@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.contrib.auth import authenticate
+from django.contrib.auth import logout
 from .serializers import AccountSerializer
 from .models import Account
 from django.contrib.auth.hashers import make_password, check_password
@@ -13,7 +13,7 @@ def create_account(request):
         email = serializer.validated_data['email']
         password = serializer.validated_data['password']
         hash_password = make_password(password)
-        Account.object.create(email=email, password=hash_password)
+        Account.objects.create(email=email, password=hash_password)
         return Response(
             {
                 'message': 'Compte créé avec successs !'
@@ -26,7 +26,7 @@ def login(request):
     email = request.data.get('email')
     password = request.data.get('password')
     try:
-        account = Account.object.get(email=email)
+        account = Account.objects.get(email=email)
     except Account.DoesNotExist:
         return Response(
             {'errors': 'Email non trouvé !'}, status=status.HTTP_404_NOT_FOUND
@@ -44,3 +44,12 @@ def login(request):
                 'error': 'Mot de passe incorrect!'
             }, status=status.HTTP_400_BAD_REQUEST
         )
+
+@api_view(['POST'])
+def logout(request):
+    logout(request)
+    return Response(
+        {
+            'message': 'Au revoir!'
+        }
+    )
