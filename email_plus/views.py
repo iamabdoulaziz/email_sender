@@ -2,9 +2,11 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import logout
-from .serializers import AccountSerializer
+from .serializers import AccountSerializer, CvsSerializer
 from .models import Account
 from django.contrib.auth.hashers import make_password, check_password
+from django.core.mail import send_mail
+import pandas
 
 @api_view(['POST'])
 def create_account(request):
@@ -52,4 +54,39 @@ def logout(request):
         {
             'message': 'Au revoir!'
         }
+    )
+
+@api_view(['POST'])
+def send_email(request):
+    serializer = CvsSerializer(data=request.data)
+    if serializer.is_valid():
+        cvs_file = request.FILES['file']
+        try:
+            dataframe = pandas.read_csv(cvs_file, delimiter=',')
+            for index, ligne in dataframe.iterrows():
+                subject = ligne['objet']
+                content = ligne['content']
+                emails = ligne['emails']
+
+                send_mail(
+                    subject=subject,
+                    message=content,
+                    from_email='abdoulazizc867@gmail.com',
+                    recipient_list=[emails]
+                )
+                return Response(
+                    {
+                        'message': 'Email envoyé avec succès'
+                    }, status=status.HTTP_200_OK
+                )
+        except Exception as e:
+            return Response(
+                {
+                    'error': f'Une erreur est survenue: {str(e)}'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    return Response(
+        {
+            'error': 'Données invalides!'
+        }, status=status.HTTP_400_BAD_REQUEST
     )
