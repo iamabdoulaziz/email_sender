@@ -1,6 +1,7 @@
-from PIL.ImagePalette import random
+from rest_framework.authtoken.models import Token
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth import logout
 from .serializers import AccountSerializer, CvsSerializer, OTPSerializer
@@ -37,9 +38,11 @@ def login(request):
         )
 
     if check_password(password, account.password):
+        token, created = Token.objects.get_or_create(user=account)
         return Response(
             {
-                'message': 'Connexion établie!'
+                'message': 'Connexion établie!',
+                'token': token.key
             }, status=status.HTTP_200_OK
         )
     else:
@@ -59,6 +62,7 @@ def logout(request):
     )
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def send_email(request):
     serializer = CvsSerializer(data=request.data)
     if serializer.is_valid():
