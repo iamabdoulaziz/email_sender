@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import logout
-from .serializers import AccountSerializer, CvsSerializer
+from .serializers import AccountSerializer, CvsSerializer, OTPSerializer
 from .models import Account, OTP
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.mail import send_mail
@@ -95,39 +95,43 @@ def send_email(request):
 
 @api_view(['POST'])
 def send_otp(request):
-    email = request.data.get('email')
+    serializer = OTPSerializer(data=request.data)
+    if serializer.is_valid():
+        email = request.data.get('email')
 
-    code = str(random.randint(100000, 999999))
-    otp = OTP.objects.create(email=email, code=code)
+        code = str(random.randint(100000, 999999))
+        otp = OTP.objects.create(email=email, code=code)
 
-    send_email(
-        "Votre code OTP",
-        f'Votre code OTP est : {code}',
-        'abdoulazizc867@gmail.com',
-        [email]
-    )
-    return Response(
-        {
-            'message': 'OTP envoyé!'
-        }, status=status.HTTP_200_OK
-    )
+        send_email(
+            "Votre code OTP",
+            f'Votre code OTP est : {code}',
+            'abdoulazizc867@gmail.com',
+            [email]
+        )
+        return Response(
+            {
+                'message': 'OTP envoyé!'
+            }, status=status.HTTP_200_OK
+        )
 
 @api_view(['POST'])
 def verify_otp(request):
-    email = request.data.get('email')
-    code = request.data.get('code')
+    serializer = OTPSerializer(data=request.data)
+    if serializer.is_valid():
+        email = request.data.get('email')
+        code = request.data.get('code')
 
-    otp = OTP.objects.filter(email=email, code=code).last()
+        otp = OTP.objects.filter(email=email, code=code).last()
 
-    if otp and otp.is_valid():
-        return Response(
-            {
-                'message': 'OTP valide'
-            }, status=status.HTTP_200_OK
-        )
-    else:
-        return Response(
-            {
-                'message': 'OTP invalide ou expiré'
-            }, status=status.HTTP_400_BAD_REQUEST
-        )
+        if otp and otp.is_valid():
+            return Response(
+                {
+                    'message': 'OTP valide'
+                }, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {
+                    'message': 'OTP invalide ou expiré'
+                }, status=status.HTTP_400_BAD_REQUEST
+            )
