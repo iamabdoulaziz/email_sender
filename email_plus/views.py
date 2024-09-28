@@ -80,11 +80,11 @@ def send_email(request):
                     from_email='abdoulazizc867@gmail.com',
                     recipient_list=[emails]
                 )
-                return Response(
-                    {
-                        'message': 'Email envoyé avec succès'
-                    }, status=status.HTTP_200_OK
-                )
+            return Response(
+                {
+                    'message': 'Email envoyé avec succès'
+                }, status=status.HTTP_200_OK
+            )
         except Exception as e:
             return Response(
                 {
@@ -106,7 +106,7 @@ def send_otp(request):
         code = str(random.randint(100000, 999999))
         otp = OTP.objects.create(email=email, code=code)
 
-        send_email(
+        send_mail(
             "Votre code OTP",
             f'Votre code OTP est : {code}',
             'abdoulazizc867@gmail.com',
