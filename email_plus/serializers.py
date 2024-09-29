@@ -7,3 +7,8 @@ class AccountSerializer(serializers.Serializer):
 
 class CvsSerializer(serializers.Serializer):
     file = serializers.FileField()
+
+class OTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+    created_at = serializers.DateTimeField()
