@@ -53,8 +53,13 @@ def login(request):
         )
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def logout(request):
-    logout(request)
+    account = request.user
+
+    token = Token.objects.get(user=account)
+    token.delete()
+
     return Response(
         {
             'message': 'Au revoir!'

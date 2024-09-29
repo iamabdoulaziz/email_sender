@@ -1,9 +1,14 @@
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
 from datetime import datetime, timedelta
 
-class Account (models.Model):
+class Account(AbstractBaseUser, models.Model):
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=100)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
 
 class Csv (models.Model):
     file = models.FileField(upload_to='csvs/')
