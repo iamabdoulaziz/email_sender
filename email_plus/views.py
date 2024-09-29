@@ -63,6 +63,7 @@ def send_email(request):
         cvs_file = request.FILES['file']
         try:
             dataframe = pandas.read_csv(cvs_file, delimiter=',')
+            print(dataframe.head())
             for index, ligne in dataframe.iterrows():
                 subject = ligne['objet']
                 content = ligne['content']
@@ -74,6 +75,9 @@ def send_email(request):
                     from_email='abdoulazizc867@gmail.com',
                     recipient_list=[emails]
                 )
+
+                print(emails)
+
                 return Response(
                     {
                         'message': 'Email envoyé avec succès'
