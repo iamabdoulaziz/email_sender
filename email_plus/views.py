@@ -106,7 +106,7 @@ def send_email(request):
 def send_otp(request):
     serializer = OTPSerializer(data=request.data)
     if serializer.is_valid():
-        email = request.data.get('email')
+        email = serializer.validated_data.get('email')
 
         try:
             account = Account.objects.get(email=email)
@@ -130,6 +130,12 @@ def send_otp(request):
             {
                 'message': 'OTP envoyé!'
             }, status=status.HTTP_200_OK
+        )
+    else:
+        return Response(
+            {
+                'error': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST
         )
 
 @api_view(['POST'])

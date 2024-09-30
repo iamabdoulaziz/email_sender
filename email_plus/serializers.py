@@ -10,5 +10,4 @@ class CvsSerializer(serializers.Serializer):
 
 class OTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    code = serializers.CharField(max_length=6)
-    created_at = serializers.DateTimeField()
+    # read_only_fields = ['code', 'created_at']
