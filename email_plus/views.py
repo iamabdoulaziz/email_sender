@@ -1,13 +1,13 @@
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import logout
 from .serializers import AccountSerializer, CvsSerializer, OTPSerializer
 from .models import Account, OTP
 from django.contrib.auth.hashers import make_password, check_password
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage, send_mail
 import pandas
 import random
 
@@ -27,6 +27,7 @@ def create_account(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
     email = request.data.get('email')
     password = request.data.get('password')
@@ -79,12 +80,19 @@ def send_email(request):
                 content = ligne['content']
                 emails = ligne['emails']
 
-                send_mail(
+                email = EmailMessage(
                     subject=subject,
-                    message=content,
+                    body=content,
                     from_email='abdoulazizc867@gmail.com',
-                    recipient_list=[emails]
+                    to=[emails]
                 )
+
+                attached_file = request.FILES.get('attachment')
+
+                if attached_file:
+                    email.attach(attached_file.name, attached_file.read(), attached_file.content_type)
+                email.send()
+
             return Response(
                 {
                     'message': 'Email envoyé avec succès'
