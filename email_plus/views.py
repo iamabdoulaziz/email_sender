@@ -108,6 +108,15 @@ def send_otp(request):
     if serializer.is_valid():
         email = request.data.get('email')
 
+        try:
+            account = Account.objects.get(email=email)
+        except Account.DoesNotExist:
+            return Response(
+                {
+                    'error': 'Email non trouvé!'
+                }, status=status.HTTP_404_NOT_FOUND
+            )
+
         code = str(random.randint(100000, 999999))
         otp = OTP.objects.create(email=email, code=code)
 
