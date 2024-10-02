@@ -112,6 +112,7 @@ def send_email(request):
     )
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def send_otp(request):
     serializer = OTPSerializer(data=request.data)
     if serializer.is_valid():
@@ -148,6 +149,7 @@ def send_otp(request):
         )
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def verify_otp(request):
     serializer = OTPSerializer(data=request.data)
     if serializer.is_valid():
