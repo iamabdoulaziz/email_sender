@@ -12,6 +12,7 @@ import pandas
 import random
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def create_account(request):
     serializer = AccountSerializer(data=request.data)
     if serializer.is_valid():
